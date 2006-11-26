@@ -4,22 +4,23 @@
  */
 
 #define F_CPU 12E6
-#define LUT_VALUES 64
+#define SIN_LUT_SIZE 64
 
 #include <math.h>
-#include <avr/io.h>
-#include <avr/wdt.h>
-#include <util/delay.h>
-#include <avr/interrupt.h>
-#include "varicode.h"
 #include <stdlib.h>
+#include <avr/io.h>
+#include <avr/sleep.h>
+#include <avr/wdt.h>
+#include <avr/interrupt.h>
+#include <util/delay.h>
+#include "varicode.h"
 
 volatile uint8_t i;
 volatile uint16_t p;
 
 uint8_t txChar(void);
 
-int8_t sinlut[LUT_VALUES];
+int8_t sinLUT[SIN_LUT_SIZE];
 
 ISR(SIG_OUTPUT_COMPARE0A) {
     if (p++ == (1472)) {
@@ -30,7 +31,7 @@ ISR(SIG_OUTPUT_COMPARE0A) {
 	}
     }
 
-    int16_t x = sinlut[i++ % LUT_VALUES];
+    int16_t x = sinLUT[i++ % SIN_LUT_SIZE];
     x += 128;
     OCR0A = (uint8_t) x;
 }
@@ -54,11 +55,10 @@ uint8_t txChar() {
 	txBitPos++;
 	return 0;
     } else if (txBitPos == patternLength + 2) {
-	txStringPos++;
-	if (*txStringPos == '\0') {
+	txBitPos = 0;
+	if (*txStringPos++ == '\0') {
 	    txStringPos = txString;
 	}
-	txBitPos = 0;
 	patternLength = psk31[(uint8_t) *txStringPos].length;
     }
 
@@ -73,21 +73,23 @@ uint8_t txChar() {
     return result;
 }
 
+void prepareSinLUT() {
+    uint8_t l;
+
+    for (l = 0; l < SIN_LUT_SIZE; l++) {
+	double d;
+
+	d = sin((((((double) l) / SIN_LUT_SIZE)) - 0.5) * M_PI * 2.0);
+	d *= 127.0;
+	sinLUT[l] = d;
+    }
+}
+
 int main(void) {
     wdt_reset();
     wdt_disable();
 
-    uint8_t l;
-
-    for (l = 0; l < LUT_VALUES; l++) {
-	double d;
-
-	d = sin((((((double) l) / LUT_VALUES)) - 0.5) * M_PI * 2.0);
-
-	d *= 127.0;
-
-	sinlut[l] = d;
-    }
+    prepareSinLUT();
 
     TCCR0A = _BV(COM0A1) | _BV(COM0A0) | _BV(WGM01) | _BV(WGM00);
     TCCR0B = _BV(CS00);
@@ -95,8 +97,11 @@ int main(void) {
 
     DDRD = _BV(PIND6);
 
+    set_sleep_mode(SLEEP_MODE_IDLE);
+
     sei();
 
     for (;;) {
+        sleep_mode();
     }
 }
