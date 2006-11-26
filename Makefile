@@ -17,7 +17,7 @@
 	TESTABLES = 
 	TESTRUNNER = 
 
-	SRC 	= $(TRG).c $(TESTABLES)
+	SRC 	= $(TRG).c $(TESTABLES) varicode.c
 
 #put additional assembler source file here
 	ASRC 	=
