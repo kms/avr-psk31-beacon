@@ -5,9 +5,9 @@
 
 #define F_CPU 18432E3
 #define BB_F 732
-#define SIN_LUT_SIZE 64
+#define SIN_LUT_SIZE 128
 //#define SYM_PERIOD ((0.032 * SIN_LUT_SIZE) / (1.0 / BB_F))
-#define SYM_PERIOD 1500
+#define SYM_PERIOD 2304
 
 #include <math.h>
 #include <stdlib.h>
@@ -19,30 +19,18 @@
 #include "varicode.h"
 #include "fifo.h"
 
-volatile uint8_t i;
-volatile uint16_t p;
-fifo *f;
-
 uint8_t txChar(void);
+
+
 void prepareSinLUT(void);
 
 int8_t sinLUT[SIN_LUT_SIZE];
 
-void uartTx(const char a) {
-    loop_until_bit_is_set(UCSR0A, UDRE0);
-    UDR0 = a;
-}
-
-ISR(SIG_USART_DATA) {
-    UDR0 = fifoGet(f);
-
-    if (isFifoEmpty(f)) {
-	UCSR0B &= ~_BV(UDRIE0);
-    }
-}
-
 ISR(SIG_OUTPUT_COMPARE0A) {
     static uint8_t shift;
+    static uint8_t k;
+    static uint8_t i;
+    static uint16_t p;
 
     p++;
 
@@ -58,30 +46,37 @@ ISR(SIG_OUTPUT_COMPARE0A) {
 	} else {
 	    PORTD |= _BV(PIND0);
 	}
+    } else if (p == SYM_PERIOD) {
+	p = 0;
+	if (shift) {
+	    i += SIN_LUT_SIZE / 2;
+	}
     }
 
-    int16_t x;
+    uint16_t x;
+
+    x = sinLUT[i++ % SIN_LUT_SIZE];
 
     if (shift) {
-	x = sinLUT[i++ % SIN_LUT_SIZE];
+	x *= sinLUT[(p / 36)];
     } else {
-	x = sinLUT[i++ % SIN_LUT_SIZE];
+	x *= 0x7f;
     }
 
-    x += 0x7f;
-    fifoPut(f, (uint8_t) x);
-    UCSR0B |= _BV(UDRIE0);
-    OCR0A = (uint8_t) (x >> 8);
+    x = x >> 7;
+    x += 128;
+
+    OCR0A = 255 - x;
 }
 
 uint8_t txChar() {
     static char txString[] = 
-	"\t\t\t"
-	"\t\t...  LA9PMA/B LA9PMA/B  ...\r\n"
+	"\t"
+"\t\t...  LA9PMA/B LA9PMA/B  ...\r\n"
 	"\t\t... Experimental Beacon ...\r\n"
 	"\t\tLA9PMA/B < JO59fg70 Tonsberg >\r\n"
-	//	"\t\tLA9PMA/B < 5W in dipole >\r\n"
-	//	"\t\tLA9PMA/B < 28.321.732MHz >\r\n"
+		"\t\tLA9PMA/B < 5W in dipole >\r\n"
+		"\t\tLA9PMA/B < 28.321.732MHz >\r\n"
 	"\t\tLA9PMA/B < Rpts to kms@skontorp.net >\r\n"
 	"\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
     static char *txStringPos = txString;
@@ -96,7 +91,7 @@ uint8_t txChar() {
 	return 0;
     } else if (txBitPos == patternLength + 2) {
 	txBitPos = 0;
-	if (*txStringPos++ == '\0') {
+	if (*++txStringPos == '\0') {
 	    txStringPos = txString;
 	}
 	patternLength = psk31[(uint8_t) *txStringPos].length;
@@ -135,8 +130,6 @@ int main(void) {
 
     prepareSinLUT();
 
-    f = fifoCreate(128);
-
     TCCR0A = _BV(COM0A1) | _BV(COM0A0) | _BV(WGM01) | _BV(WGM00);
     TCCR0B = _BV(CS00);
     TIMSK0 = _BV(OCIE0A);
@@ -144,9 +137,9 @@ int main(void) {
     DDRD = _BV(DDD6);
     DDRD |= _BV(DDD0);
 
-    UCSR0B = _BV(TXEN0);
-    UCSR0B |= _BV(UDRIE0);
-    UBRR0L = 9;
+    //UCSR0B = _BV(TXEN0);
+    //UCSR0B |= _BV(UDRIE0);
+    //UBRR0L = 9;
 
     set_sleep_mode(SLEEP_MODE_IDLE);
 
