@@ -1,6 +1,8 @@
-/*
- * Karl-Martin Skontorp LA9PMA <kms@skontorp.net>
- * $Id: fRound.h 93 2006-05-22 09:30:07Z kms $
+/* avr-psk31-beacon
+ * PSK31 Beacon generator with AF output.
+ *
+ * (c) Karl-Martin Skontorp <kms@skontorp.net> ~ http://picofarad.org/ ~ LA9PMA
+ * Licensed under the GNU GPL 2.0 or later.
  */
 
 #include "varicode.h"

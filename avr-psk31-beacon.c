@@ -1,6 +1,8 @@
-/*
- * Karl-Martin Skontorp LA9PMA <kms@skontorp.net>
- * $Id: fRound.h 93 2006-05-22 09:30:07Z kms $
+/* avr-psk31-beacon
+ * PSK31 Beacon generator with AF output.
+ *
+ * (c) Karl-Martin Skontorp <kms@skontorp.net> ~ http://picofarad.org/ ~ LA9PMA
+ * Licensed under the GNU GPL 2.0 or later.
  */
 
 #define F_CPU 18432E3
@@ -72,11 +74,11 @@ ISR(SIG_OUTPUT_COMPARE0A) {
 uint8_t txChar() {
     static char txString[] = 
 	"\t"
-"\t\t...  LA9PMA/B LA9PMA/B  ...\r\n"
+	"\t\t...  LA9PMA/B LA9PMA/B  ...\r\n"
 	"\t\t... Experimental Beacon ...\r\n"
 	"\t\tLA9PMA/B < JO59fg70 Tonsberg >\r\n"
-		"\t\tLA9PMA/B < 5W in dipole >\r\n"
-		"\t\tLA9PMA/B < 28.321.732MHz >\r\n"
+	"\t\tLA9PMA/B < 5W in dipole >\r\n"
+	"\t\tLA9PMA/B < 28.321.732MHz >\r\n"
 	"\t\tLA9PMA/B < Rpts to kms@skontorp.net >\r\n"
 	"\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
     static char *txStringPos = txString;
