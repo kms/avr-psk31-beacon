@@ -10,9 +10,9 @@ AVRSIZE=avr-size
 
 # Usage
 if test $# -lt 1; then
-	echo "Usage: avr-mem.sh <ELF file> [<AVR device name>]" >&2
+        echo "Usage: avr-mem.sh <ELF file> [<AVR device name>]" >&2
     echo "Prints sizes of the different AVR memory spaces in an ELF file." >&2
-	exit 1
+        exit 1
 fi
 
 # Memory size variables
@@ -107,13 +107,13 @@ datamax=${DATAMAX} -v eeprommax=${EEPROMMAX} -v device=$2 -- '
 /^\.(data|bss|noinit) / {data += $2}
 /^\.(eeprom) / {eeprom += $2}
 END {
-	print  "AVR Memory Usage:";
-	print  "-----------------";
+        print  "AVR Memory Usage:";
+        print  "-----------------";
     if (device != "")
     {
         printf "Device: %s\n\n", device
     }
-	printf "Program:%8d bytes", text
+        printf "Program:%8d bytes", text
     if (progmax > 0)
     {
         printf " (%2.1f%% Full)\n", (text / progmax) * 100;
@@ -123,7 +123,7 @@ END {
         print ""
     }
     print  "(.text + .data + .bootloader)\n"
-	printf "Data:   %8d bytes", data;
+        printf "Data:   %8d bytes", data;
     if (datamax > 0)
     {
         printf " (%2.1f%% Full)\n", (data / datamax) * 100;
@@ -133,7 +133,7 @@ END {
         print ""
     }
     print  "(.data + .bss + .noinit)\n"
-	if (eeprom > 0) 
+        if (eeprom > 0) 
     { 
         printf "EEPROM: %8d bytes", eeprom;
         if (eeprommax > 0)

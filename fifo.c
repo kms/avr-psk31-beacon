@@ -20,7 +20,7 @@ uint8_t fifoGet(fifo *c) {
 
 void fifoPut(fifo *c, const uint8_t p) {
     if (c->unconsumed > c->capacity) {
-	return;
+        return;
     }
     c->write = c->write & c->capacity;
     c->buffer[c->write++] = p;
