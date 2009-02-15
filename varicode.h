@@ -5,8 +5,8 @@
  * Licensed under the GNU GPL 2.0 or later.
  */
 
-#ifndef _FROUND_H
-#define _FROUND_H 1
+#ifndef _VARICODE_H
+#define _VARICODE_H 1
 
 #include <stdint.h>
 
