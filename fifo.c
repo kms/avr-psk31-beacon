@@ -1,7 +1,7 @@
 /* avr-psk31-beacon
  * PSK31 Beacon generator with AF output.
  *
- * (c) Karl-Martin Skontorp <kms@skontorp.net> ~ http://picofarad.org/ ~ LA9PMA
+ * (c) Karl-Martin Skontorp <kms@skontorp.net> ~ http://22pf.org/ ~ LA9PMA
  * Licensed under the GNU GPL 2.0 or later.
  */
 
